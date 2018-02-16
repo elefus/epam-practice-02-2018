@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
@@ -30,19 +29,19 @@ class SimpleGenomeSearcherTest {
         shortRandomStrings = new LinkedList<>();
         IntStream.range(0, 100).parallel().forEach(i ->
                 shortRandomStrings.add(fromIntStreamToString(IntStream.generate(() ->
-                        gen.nextInt() % 100 + 132).limit(200))));
+                        gen.nextInt() % 99 + 132).limit(200))));
         largeRandomStrings = new LinkedList<>();
         IntStream.range(0, 10).parallel().forEach(i ->
                 largeRandomStrings.add(fromIntStreamToString(IntStream.generate(() ->
-                        gen.nextInt() % 100 + 132).limit(2000))));
+                        gen.nextInt() % 99 + 132).limit(2000))));
     }
 
-    private void test(List<String> inputs, BiFunction<String, Integer, HashMap<String, HashSet<AtomicInteger>>> solver) {
+    private void test(List<String> inputs, BiFunction<String, Integer, HashMap<String, HashSet<Integer>>> solver) {
         IntStream.range(0, 5).parallel().forEach(n ->
                 inputs.forEach(input ->
-                        IntStream.range(5, 150).forEach(size ->
+                        IntStream.range(15, 20).forEach(size ->
                                 solver.apply(input, size).forEach((str, set) ->
-                                        set.stream().map(AtomicInteger::get).forEach(i ->
+                                        set.forEach(i ->
                                                 assertEquals(str, input.substring(i, i + str.length())))))));
     }
 
@@ -66,7 +65,7 @@ class SimpleGenomeSearcherTest {
         test(largeRandomStrings, SimpleGenomeSearcher::findAllSubseq);
     }
 
-    /*@Test
+    @Test
     void shortStationaryPack() {
         test(shortStationaryStrings, GenomeSearcher::findAllSubseq);
     }
@@ -78,11 +77,11 @@ class SimpleGenomeSearcherTest {
 
     @Test
     void shortRandomPack() {
-        test(shortRandomStrings, SimpleGenomeSearcher::findAllSubseq);
+        test(shortRandomStrings, GenomeSearcher::findAllSubseq);
     }
 
     @Test
     void largeRandomPack() {
-        test(largeRandomStrings, SimpleGenomeSearcher::findAllSubseq);
-    }*/
+        test(largeRandomStrings, GenomeSearcher::findAllSubseq);
+    }
 }
