@@ -1,16 +1,20 @@
 package com.epam;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("123.txt"))) {
-            writer.write("Hello world");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void main(String[] args) {
+        int length;
+        try{
+            length=Integer.valueOf(args[0]);
+        }catch (Exception e){return;}
+
+        Map<String,ArrayList<Integer>> hm =dna.search(length);
+        try{
+            dna.printResult(hm);
+        }catch (IOException e){}
     }
 }
