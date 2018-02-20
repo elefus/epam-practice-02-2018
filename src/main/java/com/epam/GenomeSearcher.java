@@ -22,7 +22,6 @@ public class GenomeSearcher {
             in = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(file)));
             in.mark(M);
             while(in.read(buf,0,M)==M){
-
                 key=new String(buf);
                 hashMap.putIfAbsent(key, new ArrayList<Integer>());
                 hashMap.get(key).add(position);
