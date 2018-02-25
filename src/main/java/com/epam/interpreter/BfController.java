@@ -1,8 +1,7 @@
 package com.epam.interpreter;
 
-/**
- * Created by aleksandr on 21.02.18.
- */
+import java.io.IOException;
+
 public interface BfController {
-    void interpretSymbol(char c);
+    void interpret() throws IOException;
 }

@@ -2,18 +2,13 @@ package com.epam;
 
 import org.junit.jupiter.api.Test;
 
-import javax.swing.text.html.HTMLDocument;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Created by aleksandr on 16.02.18.
- */
 public class GenomeSearchTest {
 
     @Test
