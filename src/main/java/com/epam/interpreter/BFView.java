@@ -1,9 +1,9 @@
 package com.epam.interpreter;
 
-/**
- * Created by fomin on 21.02.18.
- */
+import java.io.IOException;
+
 public interface BFView {
-    char ReadSymbol();
-    void PrintSymbol(char[] buf);
+    char readSymbol() throws IOException;
+
+    void printSymbol(char symbol) throws IOException;
 }
