@@ -1,49 +1,50 @@
 package com.epam.interpreter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 public class SimpleModel implements BFModel {
-    private ArrayList<Byte> buffer;
+    private byte[] buffer;
 
     public SimpleModel() {
         this(10);
     }
 
     public SimpleModel(int size) {
-        buffer = new ArrayList<>(Collections.nCopies(size, (byte) 0));
+        buffer = new byte[size];
     }
 
     @Override
     public void setCell(int cell, byte val) {
-        buffer.set(cell, val);
+        buffer[cell] = val;
     }
 
     @Override
     public byte getCell(int cell) {
-        return buffer.get(cell);
+        return buffer[cell];
     }
 
     @Override
     public void incrementCell(int cell) {
-        buffer.set(cell, (byte) (buffer.get(cell) + 1));
+        buffer[cell]++;
     }
 
     @Override
     public void decrementCell(int cell) {
-        buffer.set(cell, (byte) (buffer.get(cell) - 1));
+        buffer[cell]--;
     }
 
+    @Override
     public void increaseBuffer(int size) {
-        ArrayList<Byte> appendPart = new ArrayList<>(Collections.nCopies(size, (byte) 0));
-        buffer.addAll(appendPart);
+        byte[] newBuf = new byte[buffer.length + size];
+        System.arraycopy(buffer, 0, newBuf, 0, buffer.length);
+        buffer = newBuf;
     }
 
-    public ArrayList<Byte> getAllCells() {
+    @Override
+    public byte[] getAllCells() {
         return buffer;
     }
 
+    @Override
     public int getBufSize() {
-        return buffer.size();
+        return buffer.length;
     }
 }

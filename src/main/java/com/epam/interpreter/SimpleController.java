@@ -1,15 +1,12 @@
 package com.epam.interpreter;
 
-import org.apache.commons.cli.*;
-
 import java.io.IOException;
 import java.util.*;
 
 public class SimpleController implements BFController {
 
-    private SimpleModel model;
-    private SimpleView view;
-    private CommandLine cmd;
+    private BFModel model;
+    private BFView view;
     private int bufptr;
     private boolean limited;
     private int currentSize;
@@ -17,62 +14,20 @@ public class SimpleController implements BFController {
     private boolean loopNow;
     private boolean skipLoop;
     private int skipBrackets;
-    private boolean loopStartFound;
-    private int loopLevel;
-    private LinkedList<Character> stack;
+    private char symbol;
+    private LinkedList<Character> stack = new LinkedList<>();
     private ListIterator<Character> stackIter;
-    private ListIterator<Character> stackReverseIter;
-    //++[>+[-]<-]
 
     private final int APPEND_NUMBER = 10;
 
-    public SimpleController(CommandLine cmd) throws IOException {
-        this.cmd = cmd;
-        bufptr = 0;
-        loopStartFound = false;
-        bracketsControl = 0;
-        loopNow = false;
-        skipLoop = false;
-        loopLevel = 0;
-        stack = new LinkedList<>();
-        initView();
-        initModel();
-    }
-
-    private void initView() throws IOException {
-        String sourceFile;
-        String destFile;
-
-        if (cmd.hasOption("source")) {
-            sourceFile = cmd.getOptionValue("source");
-        } else {
-            sourceFile = null;
-        }
-
-        if (cmd.hasOption("out")) {
-            destFile = cmd.getOptionValue("out");
-        } else {
-            destFile = null;
-        }
-
-        view = new SimpleView(sourceFile, destFile);
-    }
-
-    private void initModel() {
-        if (cmd.hasOption("buffer")) {
-            int size = Integer.parseInt(cmd.getOptionValue("buffer"));
-            model = new SimpleModel(size);
-            limited = true;
-        } else {
-            model = new SimpleModel();
-            limited = false;
-        }
+    public SimpleController(BFModel model, BFView view, boolean limited) throws IOException {
+        this.model = model;
+        this.view = view;
+        this.limited = limited;
         currentSize = model.getBufSize();
     }
 
-    private int processSymbol() throws IOException {
-        char symbol;
-
+    private boolean getSymbolOrSkip() throws IOException {
         if (!loopNow) {
             symbol = view.readSymbol();
             if (skipLoop) {
@@ -81,19 +36,20 @@ public class SimpleController implements BFController {
                         bracketsControl++;
                     }
                     stack.push(symbol);
-                    return 0;
+                    return false;
                 }
                 skipLoop = false;
             }
         } else {
             if (!stackIter.hasPrevious()) {
                 loopNow = false;
-                return 1;
+                return false;
             }
             symbol = stackIter.previous();
             if (skipLoop) {
                 if (symbol == '[') {
                     skipBrackets++;
+                    bracketsControl++;
                 }
                 if (symbol == ']' && --skipBrackets == 0) {
                     skipLoop = false;
@@ -101,14 +57,61 @@ public class SimpleController implements BFController {
                         loopNow = false;
                     }
                 }
-                return 0;
+                return false;
             }
+        }
+        return true;
+    }
+
+    private void moveLeft() throws IOException {
+        if (!limited) {
+            if (bufptr == 0) {
+                throw new IOException("ptr<0");
+            } else {
+                bufptr--;
+            }
+        } else {
+            if (bufptr == 0) {
+                bufptr = currentSize - 1;
+            } else {
+                bufptr--;
+            }
+        }
+    }
+
+    private void moveRight() throws IOException {
+        if (!limited) {
+            if (bufptr == Integer.MAX_VALUE) {
+                throw new IOException("max array size");
+            } else {
+                if (bufptr == currentSize - 1) {
+                    int newCells = APPEND_NUMBER;
+                    if (Integer.MAX_VALUE - currentSize < APPEND_NUMBER) {
+                        newCells = Integer.MAX_VALUE - currentSize;
+                    }
+                    model.increaseBuffer(newCells);
+                    currentSize = model.getBufSize();
+                }
+                bufptr++;
+            }
+        } else {
+            if (bufptr == currentSize - 1) {
+                bufptr = 0;
+            } else {
+                bufptr++;
+            }
+        }
+    }
+
+    private int processSymbol() throws IOException {
+
+        if (!getSymbolOrSkip()) {
+            return 0;
         }
 
         if (symbol == Character.MAX_VALUE) {
             return -1;
         }
-
 
         switch (symbol) {
             case '+':
@@ -118,45 +121,10 @@ public class SimpleController implements BFController {
                 model.decrementCell(bufptr);
                 break;
             case '<':
-                if (!limited) {
-                    if (bufptr == 0) {
-                        System.out.println("ptr<0");
-                        //exeption
-                        break;
-                    } else {
-                        bufptr--;
-                    }
-                } else {
-                    if (bufptr == 0) {
-                        bufptr = currentSize - 1;
-                    } else {
-                        bufptr--;
-                    }
-                }
+                moveLeft();
                 break;
             case '>':
-                if (!limited) {
-                    if (bufptr == Integer.MAX_VALUE) {
-                        //exeption
-                        break;
-                    } else {
-                        if (bufptr == currentSize - 1) {
-                            int newCells = APPEND_NUMBER;
-                            if (Integer.MAX_VALUE - currentSize < APPEND_NUMBER) {
-                                newCells = Integer.MAX_VALUE - currentSize;
-                            }
-                            model.increaseBuffer(newCells);
-                            currentSize = model.getBufSize();
-                        }
-                        bufptr++;
-                    }
-                } else {
-                    if (bufptr == currentSize - 1) {
-                        bufptr = 0;
-                    } else {
-                        bufptr++;
-                    }
-                }
+                moveRight();
                 break;
             case '.':
                 view.printSymbol((char) model.getCell(bufptr));
@@ -170,7 +138,6 @@ public class SimpleController implements BFController {
                 if (model.getCell(bufptr) == 0) {
                     skipLoop = true;
                     skipBrackets = 1;
-                    loopStartFound = false;
                 }
                 break;
             case ']':
@@ -178,8 +145,7 @@ public class SimpleController implements BFController {
                     stack.push(symbol);
                 }
                 if (--bracketsControl < 0) {
-                    //exeption
-                    System.out.println("brackets mismatch");
+                    throw new IOException("brackets mismatch");
                 }
                 findLoopStart();
                 loopNow = true;
@@ -198,24 +164,22 @@ public class SimpleController implements BFController {
 
     private void findLoopStart() {
         int level = 0;
-        char symbol;
-//        if (loopStartFound) {
-//            stackReverseIter = stackIter;
-//            return;
-//        }
-        //if (stackIter == null) {
-        stackIter = stack.listIterator();
-        // }
+        char sym;
+
+        if (!loopNow) {
+            stackIter = stack.listIterator();
+        }
+
         while (stackIter.hasNext()) {
-            symbol = stackIter.next();
-            if (symbol == ']') {
+            sym = stackIter.next();
+            if (sym == ']') {
                 level++;
             }
-            if (symbol == '[' && (--level) - bracketsControl <= 0) {
-//                stackReverseIter = stackIter;
+            if (sym == '[' && (--level) == 0) {
                 break;
             }
         }
+
     }
 
     @Override

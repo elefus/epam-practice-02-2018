@@ -1,12 +1,10 @@
 package com.epam;
 
-import com.epam.interpreter.SimpleCommandLineParser;
-import com.epam.interpreter.SimpleController;
+import com.epam.interpreter.*;
 import org.apache.commons.cli.CommandLine;
 
-import java.io.IOException;
-
 public class Main {
+
 
     public static void main(String[] args) {
         CommandLine cmd= SimpleCommandLineParser.parse(args);
@@ -14,12 +12,8 @@ public class Main {
             System.out.println("Wrong cmd arguments");
             return;
         }
-
-        try {
-            SimpleController controller=new SimpleController(cmd);
-            controller.interpret();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        new SimpleInitializer(cmd);
     }
+
+
 }

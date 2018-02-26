@@ -1,9 +1,8 @@
 package com.epam.interpreter;
 
 import java.io.*;
-import java.util.ArrayList;
 
-public class SimpleView implements BFView {
+public class SimpleView implements BFView, Closeable {
 
     private BufferedReader reader;
     private BufferedWriter writer;
@@ -27,14 +26,13 @@ public class SimpleView implements BFView {
         }
     }
 
+    @Override
     public char readInput() throws IOException {
         char symbol;
         if (!systemInput) {
-            InputStreamReader r = new InputStreamReader((System.in));
-            BufferedReader br = new BufferedReader(r);
-            while ((symbol = (char) br.read()) == '\n') ;
-            br.close();
-            r.close();
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
+                while ((symbol = (char) br.read()) == '\n') ;
+            }
         } else {
             while ((symbol = (char) reader.read()) == '\n') ;
         }
@@ -54,17 +52,19 @@ public class SimpleView implements BFView {
         writer.flush();
     }
 
-    public void printTrace(ArrayList<Byte> buf, int bufptr) throws IOException {
-        int i=0;
-        for (Byte val:buf){
-            writer.write(val.toString()+(i==bufptr?"*|":'|'));
+    @Override
+    public void printTrace(byte[] buf, int bufptr) throws IOException {
+        int i = 0;
+        for (Byte val : buf) {
+            writer.write(val.toString() + (i == bufptr ? "*|" : '|'));
             i++;
         }
         writer.write('\n');
         writer.flush();
     }
 
-    public void closeFiles() throws IOException {
+    @Override
+    public void close() throws IOException {
         if (reader != null) {
             reader.close();
         }
