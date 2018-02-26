@@ -15,15 +15,17 @@ public class SimpleController implements BFController {
     private boolean skipLoop;
     private int skipBrackets;
     private char symbol;
+    private boolean enableTrace;
     private LinkedList<Character> stack = new LinkedList<>();
     private ListIterator<Character> stackIter;
 
     private final int APPEND_NUMBER = 10;
 
-    public SimpleController(BFModel model, BFView view, boolean limited) throws IOException {
+    public SimpleController(BFModel model, BFView view, boolean limited, boolean enableTrace) throws IOException {
         this.model = model;
         this.view = view;
         this.limited = limited;
+        this.enableTrace = enableTrace;
         currentSize = model.getBufSize();
     }
 
@@ -158,7 +160,9 @@ public class SimpleController implements BFController {
             stack.push(symbol);
         }
 
-        view.printTrace(model.getAllCells(), bufptr);
+        if (enableTrace) {
+            view.printTrace(model.getAllCells(), bufptr);
+        }
         return 0;
     }
 

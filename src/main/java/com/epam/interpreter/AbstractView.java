@@ -2,29 +2,13 @@ package com.epam.interpreter;
 
 import java.io.*;
 
-public class SimpleView implements BFView, Closeable {
+public abstract class AbstractView implements BFView, Closeable{
 
-    private BufferedReader reader;
-    private BufferedWriter writer;
-    private FileReader fr;
-    private FileWriter fw;
-    private boolean systemInput;
-
-    public SimpleView(String sourceFile, String destFile) throws IOException {
-        if (sourceFile == null) {
-            reader = new BufferedReader(new InputStreamReader(System.in));
-            systemInput = true;
-        } else {
-            fr = new FileReader(sourceFile);
-            reader = new BufferedReader(fr);
-        }
-        if (destFile == null) {
-            writer = new BufferedWriter(new OutputStreamWriter(System.out));
-        } else {
-            fw = new FileWriter(destFile);
-            writer = new BufferedWriter(fw);
-        }
-    }
+    BufferedReader reader;
+    BufferedWriter writer;
+    FileReader fr;
+    FileWriter fw;
+    boolean systemInput;
 
     @Override
     public char readInput() throws IOException {
@@ -78,4 +62,5 @@ public class SimpleView implements BFView, Closeable {
             fw.close();
         }
     }
+
 }

@@ -17,30 +17,41 @@ public class SimpleInitializer {
             this.cmd = cmd;
             initView();
             initModel();
-            controller = new SimpleController(model, view, limited);
+            initController();
             controller.interpret();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
 
+    private void initController() throws IOException {
+        boolean trace = false;
+        if (cmd.hasOption("trace")) {
+            trace = true;
+        }
+        controller = new SimpleController(model, view, limited, trace);
+    }
+
     private void initView() throws IOException {
-        String sourceFile;
-        String destFile;
 
-        if (cmd.hasOption("source")) {
-            sourceFile = cmd.getOptionValue("source");
-        } else {
-            sourceFile = null;
+        if (cmd.hasOption("source") && cmd.hasOption("out")) {
+            view = new FileToFileView(cmd.getOptionValue("source"), cmd.getOptionValue("out"));
+            return;
+        }
+        if (cmd.hasOption("source") && !cmd.hasOption("out")) {
+            view = new FileToConView(cmd.getOptionValue("source"));
+            return;
+        }
+        if (!cmd.hasOption("source") && cmd.hasOption("out")) {
+            view = new ConToFileView(cmd.getOptionValue("out"));
+            return;
+        }
+        if (!cmd.hasOption("source") && !cmd.hasOption("out")) {
+            view = new ConToConView();
+            return;
         }
 
-        if (cmd.hasOption("out")) {
-            destFile = cmd.getOptionValue("out");
-        } else {
-            destFile = null;
-        }
 
-        view = new SimpleView(sourceFile, destFile);
     }
 
     private void initModel() {
