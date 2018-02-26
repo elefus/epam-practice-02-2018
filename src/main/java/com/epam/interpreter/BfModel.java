@@ -8,4 +8,8 @@ public interface BfModel {
     void increment(int index);
 
     void decrement(int index);
+
+    void changeBufferSize(int cellsToAdd);
+
+    byte[] getAllBuffer();
 }

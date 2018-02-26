@@ -1,11 +1,8 @@
 package com.epam.interpreter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 public class ModelImpl implements BfModel {
 
-    private ArrayList<Byte> memory;
+    private byte[] memory;
     private static final int DEFAULT_BUFFER_SIZE = 10;
 
     public ModelImpl() {
@@ -13,36 +10,38 @@ public class ModelImpl implements BfModel {
     }
 
     public ModelImpl(int bufSize) {
-        memory = new ArrayList<>(Collections.nCopies(bufSize, (byte) 0));
-        Collections.fill(memory, (byte) 0);
+        memory = new byte[bufSize];
     }
 
     @Override
     public void setValue(byte symbol, int index) {
-        memory.set(index, symbol);
+        memory[index]=symbol;
     }
 
     @Override
     public byte getValue(int index) {
-        return memory.get(index);
+        return memory[index];
     }
 
     @Override
     public void increment(int index) {
-        memory.set(index, (byte) (memory.get(index) + 1));
+        memory[index]++;
     }
 
     @Override
     public void decrement(int index) {
-        memory.set(index, (byte) (memory.get(index) - 1));
+        memory[index]--;
     }
 
+    @Override
     public void changeBufferSize(int cellsToAdd) {
-        ArrayList<Byte> newPart = new ArrayList<>(Collections.nCopies(cellsToAdd, (byte) 0));
-        memory.addAll(newPart);
+        byte[] newPart=new byte[memory.length+cellsToAdd];
+        System.arraycopy(memory,0,newPart,0,memory.length);
+        memory=newPart;
     }
 
-    public ArrayList<Byte> getAllBuffer(){
+    @Override
+    public byte[] getAllBuffer(){
         return memory;
     }
 

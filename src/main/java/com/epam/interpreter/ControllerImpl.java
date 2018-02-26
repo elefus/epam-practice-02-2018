@@ -3,9 +3,7 @@ package com.epam.interpreter;
 import org.apache.commons.cli.CommandLine;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 
 
@@ -13,72 +11,30 @@ public class ControllerImpl implements BfController {
 
     private static final int CELLS_TO_ADD = 10;
 
-    private ViewImpl view;
-    private ModelImpl model;
-    private String sourceFile;
-    private String outputFile;
+    private BfView view;
+    private BfModel model;
     private int bufferSize;
     private int pointer;
     private boolean bufferIsInfinite;
     private boolean isLoop;
     private boolean endLoop;
-    private LinkedList<Character> loopsStack;
+    private LinkedList<Character> loopsStack = new LinkedList<>();
     private int brackets;
     private char input;
-    private static final int DEFAULT_BUFFER_SIZE = 10;
     private ListIterator<Character> commandIterator;
     private int loopStage;
-    private int countCommands;
     private char symbol;
-    private char cmd;
     private int bracketsToSkip;
+    private boolean enableTraceMode;
 
-    private void initViewModel(String[] args) throws IOException {
-        CommandLine cmd;
-        cmd = ArgsParser.parseArgs(args);
 
-        if (cmd.hasOption("source")) {
-            sourceFile = cmd.getOptionValue("source");
-        } else {
-            sourceFile = null;
-        }
-
-        if (cmd.hasOption("out")) {
-            outputFile = cmd.getOptionValue("out");
-        } else {
-            outputFile = null;
-        }
-
-        if (sourceFile == null && outputFile == null) {
-            view = new ViewImpl(System.in, System.out);     //Console=>Console
-        } else if (sourceFile != null && outputFile != null) {
-            view = new ViewImpl(sourceFile, outputFile);    //File=>File
-        } else if (sourceFile == null && outputFile != null) {
-            view = new ViewImpl(System.in, outputFile);     //Console=>File
-        } else if (sourceFile != null && outputFile == null) {
-            view = new ViewImpl(sourceFile, System.out);    //File=>Console
-        }
-
-        if (cmd.hasOption("buffer")) {
-            bufferSize = Integer.parseInt(cmd.getOptionValue("buffer"));
-            model = new ModelImpl(bufferSize);
-            bufferIsInfinite = false;
-        } else {
-            bufferSize = DEFAULT_BUFFER_SIZE;
-            model = new ModelImpl();
-            bufferIsInfinite = true;
-        }
-    }
-
-    public ControllerImpl(String[] args) throws IOException {
-        initViewModel(args);
-        pointer = 0;
-        loopsStack = new LinkedList<>();
-        isLoop = false;
-        brackets = 0;
-        endLoop = false;
-        loopStage = 0;
-        bracketsToSkip = 0;
+    public ControllerImpl(BfView view, BfModel model, boolean isInfinite,
+                          int bufferSize, boolean enableTraceMode) {
+        this.view = view;
+        this.model = model;
+        this.bufferIsInfinite = isInfinite;
+        this.bufferSize = bufferSize;
+        this.enableTraceMode = enableTraceMode;
     }
 
     @Override
@@ -86,17 +42,16 @@ public class ControllerImpl implements BfController {
         while (interpretNextSymbol() != -1) ;
     }
 
-    private int interpretNextSymbol() throws IOException {
-
+    private boolean getSymbolOrSkip() throws IOException {
         if (!isLoop) {
             symbol = view.readSymbol();
-            if(endLoop){
-                if(symbol!=']'){
-                    if(symbol=='['){
+            if (endLoop) {
+                if (symbol != ']') {
+                    if (symbol == '[') {
                         brackets++;
                     }
                     loopsStack.push(symbol);
-                    return 0;
+                    return false;
                 }
                 endLoop = false;
             }
@@ -117,9 +72,9 @@ public class ControllerImpl implements BfController {
                             isLoop = false;
                         }
                         endLoop = false;
-                        return 0;
+                        return false;
                     }
-                    return 0;
+                    return false;
                 }
             } else {
                 if (endLoop) {
@@ -127,9 +82,17 @@ public class ControllerImpl implements BfController {
                     if (brackets == 0) {
                         isLoop = false;
                     }
-                    return 0;
+                    return false;
                 }
             }
+        }
+        return true;
+    }
+
+    private int interpretNextSymbol() throws IOException {
+
+        if (!getSymbolOrSkip()) {
+            return 0;
         }
 
         if (symbol == Character.MAX_VALUE) {
@@ -193,18 +156,17 @@ public class ControllerImpl implements BfController {
                 loopStage = 0;
                 brackets--;
                 endLoop = false;
+                if (!isLoop) {
+                    commandIterator = loopsStack.listIterator();
+                }
                 isLoop = true;
-                commandIterator = loopsStack.listIterator();
 
-                countCommands = 0;
                 while (commandIterator.hasNext()) {
                     char stackCommand = commandIterator.next();
-
-                    countCommands++;
                     if (stackCommand == '[') {
                         loopStage--;
                     }
-                    if (stackCommand == '[' && loopStage - brackets <= 0) {
+                    if (stackCommand == '[' && loopStage == 0) {
                         break;
                     }
                     if (stackCommand == ']') {
@@ -228,7 +190,9 @@ public class ControllerImpl implements BfController {
             loopsStack.push(symbol);
         }
 
-        view.trace(model.getAllBuffer(), pointer);
+        if (enableTraceMode) {
+            view.trace(model.getAllBuffer(), pointer);
+        }
         return 0;
     }
 }
