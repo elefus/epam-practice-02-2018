@@ -16,6 +16,7 @@ public class Main {
 
     public static void main(String[] args) {
 
+//        String[] strs = {"-source", "./src/test/resources/tests/optimizationTest.bf"};
         CommandLine cmd = SimpleCommandLineParser.parse(args);
         if (cmd == null) {
             System.out.println("Wrong cmd arguments");

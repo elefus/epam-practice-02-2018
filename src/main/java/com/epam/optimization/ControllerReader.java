@@ -46,6 +46,13 @@ public class ControllerReader implements Runnable {
                     case '.':
                         cmd = new Print(1);
                         break;
+                    case '[':
+                        cmd = new Goto(1);
+                        break;
+                    case ']':
+                        cmd = new Goto(-1);
+                        break;
+
 
 
                     default:

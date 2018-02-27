@@ -1,7 +1,7 @@
 package com.epam.optimization.commands;
 
 public abstract class Command {
-    int val;
+    private int val;
 
     protected Command(int val) {
         this.val = val;
