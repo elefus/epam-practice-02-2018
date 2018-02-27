@@ -8,6 +8,7 @@ public abstract class ViewAbstract implements BfView, Closeable {
     protected BufferedWriter writer;
     protected FileReader fileReader;
     protected FileWriter fileWriter;
+    protected BufferedReader consoleReader;
     protected boolean fromConsole;
 
     @Override
@@ -37,15 +38,16 @@ public abstract class ViewAbstract implements BfView, Closeable {
 
     @Override
     public char readInput() throws IOException {
-        if (!fromConsole) {
-            reader = new BufferedReader(new InputStreamReader(System.in));
-        }
         char input;
-        while ((input = (char) reader.read()) == '\n') ;
-
-        if (reader != null && !fromConsole) {
-            reader.close();
+        if (!fromConsole) {
+            if(consoleReader==null) {
+                consoleReader = new BufferedReader(new InputStreamReader(System.in));
+            }
+                while ((input = (char) consoleReader.read()) == '\n') ;
+        }else{
+            while ((input = (char) reader.read()) == '\n') ;
         }
+
         return input;
     }
 
