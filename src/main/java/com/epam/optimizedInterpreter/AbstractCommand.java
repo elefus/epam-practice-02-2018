@@ -1,7 +1,7 @@
 package com.epam.optimizedInterpreter;
 
 public class AbstractCommand {
-    protected int value;
+    private int value;
 
     public AbstractCommand(int value) {
         this.value = value;

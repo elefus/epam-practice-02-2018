@@ -17,7 +17,7 @@ public class InputReader implements Runnable {
         this.view = view;
     }
 
-    private AbstractCommand createCommand(char symbol) {
+    private AbstractCommand createCommand(char symbol) throws IOException {
         AbstractCommand command;
         switch (symbol) {
             case '+':
@@ -32,8 +32,25 @@ public class InputReader implements Runnable {
             case '>':
                 command = new Move(1);
                 break;
-            default:
+            case '.':
+                command = new Print(1);
+                break;
+            case ',':
+                command = new Read(1);
+                int value = view.readInput();
+                command.setValue(value);
+                break;
+            case '[':
+                command = new Goto(1);
+                break;
+            case ']':
+                command = new Goto(-1);
+                break;
+            case '_':
                 command = new End(1);
+                break;
+            default:
+                command = null;
                 break;
         }
         return command;
@@ -50,9 +67,11 @@ public class InputReader implements Runnable {
                 }
 
                 cmd = createCommand(symbol);
-                commandsQueue.put(cmd);
-                if(cmd instanceof End){
-                    return;
+                if(cmd!=null) {
+                    commandsQueue.put(cmd);
+                    if (cmd instanceof End) {
+                        return;
+                    }
                 }
             }
         } catch (IOException e) {
