@@ -6,6 +6,7 @@ public abstract class AbstractView implements BFView, Closeable{
 
     BufferedReader reader;
     BufferedWriter writer;
+    BufferedReader br;
     FileReader fr;
     FileWriter fw;
     boolean systemInput;
@@ -14,9 +15,10 @@ public abstract class AbstractView implements BFView, Closeable{
     public char readInput() throws IOException {
         char symbol;
         if (!systemInput) {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
-                while ((symbol = (char) br.read()) == '\n') ;
+            if(br==null){
+                br = new BufferedReader(new InputStreamReader(System.in));
             }
+            while ((symbol = (char) br.read()) == '\n') ;
         } else {
             while ((symbol = (char) reader.read()) == '\n') ;
         }
