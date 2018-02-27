@@ -1,9 +1,13 @@
 package com.epam;
 
 import com.epam.interpreter.*;
+import com.epam.optimizedInterpreter.AbstractCommand;
+import com.epam.optimizedInterpreter.InputOptimizer;
+import com.epam.optimizedInterpreter.InputReader;
 import org.apache.commons.cli.CommandLine;
 
 import java.io.IOException;
+import java.util.concurrent.*;
 
 public class Main {
 
@@ -18,6 +22,9 @@ public class Main {
         int bufferSize;
         boolean bufferIsInfinite;
         boolean enableTraceMode;
+        boolean enableOptimization;
+        BlockingQueue<AbstractCommand> commandsQueue = new LinkedBlockingQueue<>();
+        BlockingQueue<AbstractCommand> optimizedCommandsQueue = new LinkedBlockingDeque<>();
 
         CommandLine cmd;
         cmd = ArgsParser.parseArgs(args);
@@ -53,16 +60,29 @@ public class Main {
             model = new ModelImpl();
             bufferIsInfinite = true;
         }
-        if(cmd.hasOption("trace")){
-            enableTraceMode=true;
-        }else {
-            enableTraceMode=false;
+        if (cmd.hasOption("trace")) {
+            enableTraceMode = true;
+        } else {
+            enableTraceMode = false;
+        }
+        if (cmd.hasOption("optimize")) {
+            enableOptimization = true;
+        } else {
+            enableOptimization = false;
         }
 
-        ControllerImpl controller;
+        enableOptimization = true;
 
-        controller = new ControllerImpl(view, model, bufferIsInfinite, bufferSize, enableTraceMode);
-        controller.interpret();
+        if (enableOptimization) {
+            ExecutorService pool = Executors.newFixedThreadPool(3);
+            pool.execute(new InputReader(commandsQueue, view));
+            pool.execute(new InputOptimizer(commandsQueue, optimizedCommandsQueue));
+            pool.shutdown();
+        } else {
+            ControllerImpl controller;
+            controller = new ControllerImpl(view, model, bufferIsInfinite, bufferSize, enableTraceMode);
+            controller.interpret();
+        }
 
     }
 }
