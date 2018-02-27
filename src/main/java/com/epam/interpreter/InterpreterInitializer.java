@@ -1,24 +1,32 @@
 package com.epam.interpreter;
 
+import com.epam.optimization.ControllerOptimizer;
+import com.epam.optimization.ControllerReader;
+import com.epam.optimization.commands.Command;
 import org.apache.commons.cli.CommandLine;
 
 import java.io.IOException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class SimpleInitializer {
+public class InterpreterInitializer {
 
     private BFModel model;
     private BFView view;
     private BFController controller;
     private CommandLine cmd;
     private boolean limited;
+    private boolean optimization;
 
-    public SimpleInitializer(CommandLine cmd) {
+    public InterpreterInitializer(CommandLine cmd, boolean optimization) {
         try {
             this.cmd = cmd;
+            this.optimization = optimization;
             initView();
             initModel();
             initController();
-            controller.interpret();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -29,7 +37,18 @@ public class SimpleInitializer {
         if (cmd.hasOption("trace")) {
             trace = true;
         }
-        controller = new SimpleController(model, view, limited, trace);
+        if (!optimization) {
+            controller = new SimpleController(model, view, limited, trace);
+            controller.interpret();
+            return;
+        }
+
+        ExecutorService es = Executors.newFixedThreadPool(3);
+        BlockingQueue<Command> readerQueue = new LinkedBlockingQueue<>(10);
+        BlockingQueue<Command> optimizedQueue = new LinkedBlockingQueue<>(10);
+        es.execute(new ControllerReader(readerQueue, view));
+        es.execute(new ControllerOptimizer(readerQueue, optimizedQueue));
+        es.shutdown();
     }
 
     private void initView() throws IOException {
