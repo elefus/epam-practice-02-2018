@@ -1,6 +1,7 @@
 package com.epam.interpreter.base;
 
 import com.epam.interpreter.model.BFGlobalState;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractBI implements BrainfuckInstruction {
     protected final int value;
@@ -12,7 +13,7 @@ public abstract class AbstractBI implements BrainfuckInstruction {
     }
 
     @Override
-    public BFGlobalState addSelf(BFGlobalState state) {
+    public BFGlobalState addSelf(@NotNull BFGlobalState state) {
         return nextInstruction.addSelf(state.addInstruction(this));
     }
 }

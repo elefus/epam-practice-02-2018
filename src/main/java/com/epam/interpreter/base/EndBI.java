@@ -10,8 +10,8 @@ public class EndBI implements BrainfuckInstruction {
     @Override
     public BFGlobalState eval(@NotNull BFGlobalState initState) {
         try {
-            initState.getInput().close();
-            initState.getOutput().close();
+            initState.getInput();
+            initState.getOutput().flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -24,8 +24,9 @@ public class EndBI implements BrainfuckInstruction {
         return "END OF WORLD";
     }
 
+    @NotNull
     @Override
-    public BFGlobalState addSelf(BFGlobalState state) {
+    public BFGlobalState addSelf(@NotNull BFGlobalState state) {
         return state.addInstruction(this);
     }
 }

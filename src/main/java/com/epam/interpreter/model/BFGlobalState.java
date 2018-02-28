@@ -108,7 +108,7 @@ public class BFGlobalState {
     }
 
     @NotNull
-    public BFGlobalState addInstructions(Collection<BrainfuckInstruction> instructions) {
+    public BFGlobalState addInstructions(@NotNull Collection<BrainfuckInstruction> instructions) {
         this.instructions.addAll(instructions);
         return this;
     }

@@ -13,8 +13,7 @@ public class ReadBI extends AbstractBI {
 
     @Override
     public BFGlobalState eval(@NotNull BFGlobalState initState) {
-        BufferedReader input = initState.getInput();
-        try (input) {
+        try (BufferedReader input = initState.getInput()) {
             if (input.skip(value) != value) {
                 System.err.println("Read less symbols than must be read");
             }

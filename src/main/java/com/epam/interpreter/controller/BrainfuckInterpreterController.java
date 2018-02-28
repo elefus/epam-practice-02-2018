@@ -116,8 +116,8 @@ public class BrainfuckInterpreterController {
                     stack.getStack().push(c);
                 });
 
-        ArrayList<ImmutablePair<BFInstructions, Integer>> fastInstructions = new ArrayList<>(instructions);
-        Stack<Integer> jeIndices = new Stack<>();
+        @NotNull ArrayList<ImmutablePair<BFInstructions, Integer>> fastInstructions = new ArrayList<>(instructions);
+        @NotNull Stack<Integer> jeIndices = new Stack<>();
         int balance = 0;
         int distance;
         for (int i = 0; i < fastInstructions.size(); ++i) {

@@ -22,7 +22,7 @@ public class NopBI implements BrainfuckInstruction {
     }
 
     @Override
-    public BFGlobalState addSelf(BFGlobalState state) {
+    public BFGlobalState addSelf(@NotNull BFGlobalState state) {
         return nextInstruction.addSelf(state.addInstruction(this));
     }
 }

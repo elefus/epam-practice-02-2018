@@ -1,4 +1,5 @@
 package com.epam.interpreter.view;
 
-public class BrainfuckInterpreterView {
+public interface BrainfuckInterpreterView {
+    void run();
 }
