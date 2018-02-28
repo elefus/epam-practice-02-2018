@@ -53,13 +53,16 @@ public class ControllerReader implements Runnable {
                         cmd = new Goto(-1);
                         break;
 
+                    case '_':
+                        cmd = new End(1);
+                        break;
 
 
                     default:
-                        cmd = new End(1);
-                        cmdQueue.put(cmd);
-                        return;
-//                        continue;
+//                        cmd = new End(1);
+//                        cmdQueue.put(cmd);
+//                        return;
+                        continue;
                 }
 
                 cmdQueue.put(cmd);

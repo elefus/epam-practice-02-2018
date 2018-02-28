@@ -6,9 +6,7 @@ public interface BFModel {
 
     byte getCell(int cell);
 
-    void incrementCell(int cell);
-
-    void decrementCell(int cell);
+    void addCell(int cell, byte val);
 
     void increaseBuffer(int size);
 

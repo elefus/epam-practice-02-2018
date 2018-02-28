@@ -117,10 +117,10 @@ public class SimpleController implements BFController {
 
         switch (symbol) {
             case '+':
-                model.incrementCell(bufptr);
+                model.addCell(bufptr, (byte) 1);
                 break;
             case '-':
-                model.decrementCell(bufptr);
+                model.addCell(bufptr, (byte) -1);
                 break;
             case '<':
                 moveLeft();

@@ -22,13 +22,8 @@ public class SimpleModel implements BFModel {
     }
 
     @Override
-    public void incrementCell(int cell) {
-        buffer[cell]++;
-    }
-
-    @Override
-    public void decrementCell(int cell) {
-        buffer[cell]--;
+    public void addCell(int cell, byte val) {
+        buffer[cell] += val;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.epam.optimization;
 
 import com.epam.optimization.commands.*;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
@@ -15,22 +16,23 @@ public class ControllerOptimizer implements Runnable {
     private LinkedList<Command> stack = new LinkedList<>();
     private Iterator<Command> stackIter;
     private final int STACK_SIZE = 100;
+    private int bracketsControl;
 
     public ControllerOptimizer(BlockingQueue<Command> inputQueue, BlockingQueue<Command> optimizedQueue) {
         this.inputQueue = inputQueue;
         this.optimizedQueue = optimizedQueue;
     }
 
-    private boolean isEnd() throws InterruptedException {
+    private boolean isEnd() throws InterruptedException, IOException {
         if (curCmd instanceof End) {
+            if (bracketsControl != 0) {
+                throw new IOException("brackets mismatch " + bracketsControl);
+            }
             while ((optimizedCmd = stack.pollLast()) != null) {
                 optimizedQueue.put(optimizedCmd);
             }
-
-            System.out.println("OPTIMIZED");
-            for (Command c : optimizedQueue) {
-                System.out.println(c);
-            }
+            optimizedQueue.put(curCmd);
+//            System.out.println("OPTIMIZED");
             return true;
         }
         return false;
@@ -53,6 +55,9 @@ public class ControllerOptimizer implements Runnable {
     }
 
     private int tryToMergeCommands() {
+        if (curCmd.getClass() == Goto.class && curCmd.getVal() == 1) {
+            return 0;
+        }
         if (curCmd.getClass() != Read.class && curCmd.getClass() == stackCmd.getClass()) {
             stack.pop();
             int newVal = curCmd.getVal() + stackCmd.getVal();
@@ -107,7 +112,8 @@ public class ControllerOptimizer implements Runnable {
             return;
         }
         itCmd = stackIter.next();
-        if (itCmd instanceof Add && (itCmd.getVal() == 1 || itCmd.getVal() == -1)) {
+        if ((itCmd instanceof Add && (itCmd.getVal() == 1 || itCmd.getVal() == -1))
+                || (itCmd instanceof Assign && itCmd.getVal() == 0)) {
             for (int i = 0; i < 3; i++) {
                 stack.pop();
             }
@@ -117,8 +123,23 @@ public class ControllerOptimizer implements Runnable {
     }
 
     private void deleteAddBeforeAssign() {
+        if (stack.isEmpty()) {
+            return;
+        }
         if (stack.peek().getClass() == Add.class) {
             stack.pop();
+        }
+    }
+
+    private void checkBracketsMatch() throws IOException {
+        if (curCmd.getClass() == Goto.class) {
+            if (curCmd.getVal() > 0) {
+                bracketsControl++;
+                return;
+            }
+            if (--bracketsControl < 0) {
+                throw new IOException("brackets mismatch");
+            }
         }
     }
 
@@ -128,12 +149,14 @@ public class ControllerOptimizer implements Runnable {
             while (true) {
                 curCmd = inputQueue.take();
 
-                System.out.println(curCmd.toString());
+//                System.out.println(curCmd.toString());
                 stackCmd = stack.peek();
 
                 if (isEnd()) {
                     return;
                 }
+
+                checkBracketsMatch();
 
                 if (checkStackOverflow() == -1) {
                     continue;
@@ -151,8 +174,8 @@ public class ControllerOptimizer implements Runnable {
 
                 stack.push(curCmd);
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException | IOException e) {
+            System.err.println(e.getMessage());
         }
     }
 }

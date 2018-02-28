@@ -1,5 +1,6 @@
 package com.epam.interpreter;
 
+import com.epam.optimization.ControllerExecutor;
 import com.epam.optimization.ControllerOptimizer;
 import com.epam.optimization.ControllerReader;
 import com.epam.optimization.commands.Command;
@@ -48,6 +49,7 @@ public class InterpreterInitializer {
         BlockingQueue<Command> optimizedQueue = new LinkedBlockingQueue<>(10);
         es.execute(new ControllerReader(readerQueue, view));
         es.execute(new ControllerOptimizer(readerQueue, optimizedQueue));
+        es.execute(new ControllerExecutor(optimizedQueue, model, view, limited, trace));
         es.shutdown();
     }
 
