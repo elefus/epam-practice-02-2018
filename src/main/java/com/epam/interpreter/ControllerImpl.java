@@ -27,7 +27,6 @@ public class ControllerImpl implements BfController {
     private int bracketsToSkip;
     private boolean enableTraceMode;
 
-
     public ControllerImpl(BfView view, BfModel model, boolean isInfinite,
                           int bufferSize, boolean enableTraceMode) {
         this.view = view;
@@ -101,10 +100,10 @@ public class ControllerImpl implements BfController {
 
         switch (symbol) {
             case '+':
-                model.increment(pointer);
+                model.addValue(pointer, (byte) 1);
                 break;
             case '-':
-                model.decrement(pointer);
+                model.addValue(pointer, (byte) -1);
                 break;
             case '>':
                 if (bufferIsInfinite) {

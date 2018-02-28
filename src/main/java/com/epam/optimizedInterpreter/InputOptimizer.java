@@ -1,5 +1,6 @@
 package com.epam.optimizedInterpreter;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.concurrent.BlockingQueue;
@@ -11,6 +12,7 @@ public class InputOptimizer implements Runnable {
     private AbstractCommand cmd;
     private AbstractCommand stackTop;
     private static final int STACK_SIZE = 10;
+    private int brackets = 0;
 
 
     public InputOptimizer(BlockingQueue<AbstractCommand> commands, BlockingQueue<AbstractCommand> optimizedCommandsQueue) {
@@ -22,6 +24,12 @@ public class InputOptimizer implements Runnable {
         stackTop = commandsStack.peek();
         if (cmd instanceof Read) {
             return false;
+        }
+        if (cmd instanceof Goto && stackTop instanceof Goto) {
+            if ((cmd.getValue() > 0 && stackTop.getValue() > 0) ||
+                    (cmd.getValue() < 0 && stackTop.getValue() < 0)) {
+                return false;
+            }
         }
         if (cmd.getClass() == stackTop.getClass()) {
             int newValue;
@@ -79,9 +87,9 @@ public class InputOptimizer implements Runnable {
         while ((command = commandsStack.pollLast()) != null) {
             optimizedCommandsQueue.put(command);
         }
-        for (AbstractCommand com : optimizedCommandsQueue) {
-            System.out.println(com);
-        }
+//        for (AbstractCommand com : optimizedCommandsQueue) {
+//            System.out.println(com);
+//        }
     }
 
     private void tryToMakeAssignmentFromLoop() {
@@ -95,19 +103,32 @@ public class InputOptimizer implements Runnable {
             if (iterator.hasNext()) {
                 command2 = iterator.next();
             }
-            if (command2 instanceof Add) {
-                if (command2.getValue() == -1 || command2.getValue() == 1) {
-                    for (int i = 0; i < 3; i++) {
-                        commandsStack.pop();
-                    }
-                    iterator = commandsStack.listIterator();
-                    if (iterator.hasNext()) {
-                        command = iterator.next();
-                    }
-                    if (command instanceof Add) {
-                        commandsStack.pop();
-                    }
-                    commandsStack.push(new Assign(0));
+            if (command2 instanceof Add && (command2.getValue() == -1 || command2.getValue() == 1) ||
+                    (command2 instanceof Assign && command2.getValue() == 0)) {
+
+                for (int i = 0; i < 3; i++) {
+                    commandsStack.pop();
+                }
+                iterator = commandsStack.listIterator();
+                if (iterator.hasNext()) {
+                    command = iterator.next();
+                }
+                if (command instanceof Add) {
+                    commandsStack.pop();
+                }
+                commandsStack.push(new Assign(0));
+
+            }
+        }
+    }
+
+    private void checkBrackets() throws IOException {
+        if (cmd instanceof Goto) {
+            if (cmd.getValue() > 0) {
+                brackets++;
+            } else {
+                if (brackets-- == 0) {
+                    throw new IOException("Brackets mismatch");
                 }
             }
         }
@@ -120,11 +141,18 @@ public class InputOptimizer implements Runnable {
                 cmd = commandsQueue.take();
 
                 if (cmd instanceof End) {
+                    if (brackets != 0) {
+                        throw new IOException("Brackets mismatch");
+                    }
+                    commandsStack.push(cmd);
+                    System.out.println("optimized");
                     flushStackToExecution();
                     return;
                 } else {
                     tryToSendLastCommandToExecution();
                 }
+
+                checkBrackets();
 
                 if (commandsStack.isEmpty()) {
                     commandsStack.push(cmd);
@@ -145,6 +173,8 @@ public class InputOptimizer implements Runnable {
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
         }
     }
 }

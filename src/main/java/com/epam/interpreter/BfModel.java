@@ -5,9 +5,7 @@ public interface BfModel {
 
     byte getValue(int index);
 
-    void increment(int index);
-
-    void decrement(int index);
+    void addValue(int index,byte value);
 
     void changeBufferSize(int cellsToAdd);
 

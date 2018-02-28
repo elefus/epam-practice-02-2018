@@ -10,7 +10,7 @@ public class ArgsParser {
         options.addOption("b", "buffer", true, "set buffer size");
         options.addOption("o", "out", true, "set the output file");
         options.addOption("t", "trace", false, "enable trace mode");
-        options.addOption("optimize", "optimize", false, "enable optimisation");
+        options.addOption("opt", "optimize", false, "enable optimisation");
 
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("interpreter", options);

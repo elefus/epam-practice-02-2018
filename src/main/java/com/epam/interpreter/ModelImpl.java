@@ -15,7 +15,7 @@ public class ModelImpl implements BfModel {
 
     @Override
     public void setValue(byte symbol, int index) {
-        memory[index]=symbol;
+        memory[index] = symbol;
     }
 
     @Override
@@ -24,24 +24,19 @@ public class ModelImpl implements BfModel {
     }
 
     @Override
-    public void increment(int index) {
-        memory[index]++;
-    }
-
-    @Override
-    public void decrement(int index) {
-        memory[index]--;
+    public void addValue(int index, byte value) {
+        memory[index] = (byte) (memory[index] + value);
     }
 
     @Override
     public void changeBufferSize(int cellsToAdd) {
-        byte[] newPart=new byte[memory.length+cellsToAdd];
-        System.arraycopy(memory,0,newPart,0,memory.length);
-        memory=newPart;
+        byte[] newPart = new byte[memory.length + cellsToAdd];
+        System.arraycopy(memory, 0, newPart, 0, memory.length);
+        memory = newPart;
     }
 
     @Override
-    public byte[] getAllBuffer(){
+    public byte[] getAllBuffer() {
         return memory;
     }
 
