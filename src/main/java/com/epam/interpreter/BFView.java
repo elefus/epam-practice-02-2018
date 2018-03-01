@@ -10,4 +10,6 @@ public interface BFView {
     char readInput() throws IOException;
 
     void printTrace(byte[] buf, int bufptr) throws IOException;
+
+    void close() throws IOException;
 }

@@ -12,6 +12,7 @@ public class SimpleCommandLineParser {
         options.addOption("b", "buffer", true, "Set the buffer's size");
         options.addOption("o", "out", true, "Set the destination file");
         options.addOption("t", "trace", false, "Enable tracing");
+        options.addOption("opt", "optimization", false, "Enable optimization");
 
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("interpreter", options);

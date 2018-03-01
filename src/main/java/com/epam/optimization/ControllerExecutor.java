@@ -104,8 +104,12 @@ public class ControllerExecutor implements Runnable {
         }
     }
 
-    private boolean processIfEnd() {
-        return curCmd instanceof End;
+    private boolean processIfEnd() throws IOException {
+        if (!(curCmd instanceof End)) {
+            return false;
+        }
+        view.close();
+        return true;
     }
 
     private void processIfRead() throws IOException {

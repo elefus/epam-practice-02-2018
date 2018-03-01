@@ -19,12 +19,10 @@ public class InterpreterInitializer {
     private BFController controller;
     private CommandLine cmd;
     private boolean limited;
-    private boolean optimization;
 
-    public InterpreterInitializer(CommandLine cmd, boolean optimization) {
+    public InterpreterInitializer(CommandLine cmd) {
         try {
             this.cmd = cmd;
-            this.optimization = optimization;
             initView();
             initModel();
             initController();
@@ -38,7 +36,7 @@ public class InterpreterInitializer {
         if (cmd.hasOption("trace")) {
             trace = true;
         }
-        if (!optimization) {
+        if (!cmd.hasOption("optimization")) {
             controller = new SimpleController(model, view, limited, trace);
             controller.interpret();
             return;
