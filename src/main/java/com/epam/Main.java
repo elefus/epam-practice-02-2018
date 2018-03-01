@@ -1,8 +1,10 @@
 package com.epam;
 
+import org.apache.commons.cli.*;
+
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        new Interpreter(args);
     }
 }
