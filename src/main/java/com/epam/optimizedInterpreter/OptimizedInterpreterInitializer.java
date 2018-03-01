@@ -22,10 +22,10 @@ public class OptimizedInterpreterInitializer {
 
     public OptimizedInterpreterInitializer(CommandLine cmd) throws IOException {
         this.cmd = cmd;
-        init();
+        initialize();
     }
 
-    private void init() throws IOException {
+    private void initialize() throws IOException {
         if (cmd.hasOption("source")) {
             sourceFile = cmd.getOptionValue("source");
         } else {

@@ -1,55 +1,75 @@
 package com.epam;
 
 import com.epam.interpreter.ArgsParser;
-import com.epam.interpreter.BfView;
-import com.epam.interpreter.ViewFromFileToFile;
 import com.epam.optimizedInterpreter.OptimizedInterpreterInitializer;
 import org.apache.commons.cli.CommandLine;
-import org.junit.Rule;
-import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.emptyStandardInputStream;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
 
 public class OptimizedInterpreterTests {
 
-    @Rule
-    public final TextFromStandardInputStream systemInMock
-            = emptyStandardInputStream();
-    @Test
-    void testMethod() throws IOException {
-        // Prepare
-        OptimizedInterpreterInitializer opt = mock(OptimizedInterpreterInitializer.class);
-        String inputFile="./src/test/resources/tests/summation.bf";
-        String outputFile="./src/test/resources/tests/computedResults/summation_result.bf";
-        String answerFile="./src/test/resources/tests/answers/summation_answer.bf";
+    String inputFile;
+    String outputFile;
+    String answerFile;
+    BufferedReader reader;
+    ByteArrayInputStream in;
+    CommandLine cmd;
+    byte expected, actual;
+
+    private void prepare() throws IOException {
+        System.setIn(in);
         String[] strs = {"-source", inputFile,
-                "-out", outputFile};
-
-        CommandLine cmd = ArgsParser.parseArgs(strs);
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        BufferedReader reader;
-        reader=new BufferedReader(new InputStreamReader(new FileInputStream(new File(answerFile))));
-        byte expected = (byte) reader.read();
+                "-out", outputFile,
+                "-optimize"};
+        cmd = ArgsParser.parseArgs(strs);
+        reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(answerFile))));
+        expected =(byte) reader.read();
         reader.close();
-
-
-        // Execute
-
-        new OptimizedInterpreterInitializer(cmd);
-        reader=new BufferedReader(new InputStreamReader(new FileInputStream(new File(outputFile))));
-        byte actual = (byte) reader.read();
-        reader.close();
-
-        // Assertions
-        assertEquals(expected,actual);
     }
 
+    private void execute() throws IOException, InterruptedException {
+        new OptimizedInterpreterInitializer(cmd);
+        Thread.sleep(100);
+        reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(outputFile))));
+        actual = (byte) reader.read();
+        reader.close();
+    }
+
+    @Test
+    @DisplayName("Summation")
+    void testMethod1() throws IOException, InterruptedException {
+        // Prepare
+        inputFile = "./src/test/resources/tests/summation.bf";
+        outputFile = "./src/test/resources/tests/computedResults/summation_result.bf";
+        answerFile = "./src/test/resources/tests/answers/summation_answer.bf";
+        in = new ByteArrayInputStream("! ".getBytes());
+        prepare();
+
+        // Execute
+        execute();
+
+        // Assertions
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("Subtraction")
+    void testMethod2() throws IOException, InterruptedException {
+        // Prepare
+        inputFile = "./src/test/resources/tests/subtraction.bf";
+        outputFile = "./src/test/resources/tests/computedResults/subtraction_result.bf";
+        answerFile = "./src/test/resources/tests/answers/subtraction_answer.bf";
+        in = new ByteArrayInputStream("dC".getBytes());
+        prepare();
+
+        // Execute
+        execute();
+
+        // Assertions
+        assertEquals(expected, actual);
+    }
 }

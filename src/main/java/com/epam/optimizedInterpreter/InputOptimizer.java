@@ -145,7 +145,7 @@ public class InputOptimizer implements Runnable {
                         throw new IOException("Brackets mismatch");
                     }
                     commandsStack.push(cmd);
-                    System.out.println("optimized");
+//                    System.out.println("optimized");
                     flushStackToExecution();
                     return;
                 } else {

@@ -5,6 +5,7 @@ import java.io.*;
 public abstract class ViewAbstract implements BfView, Closeable {
 
     protected BufferedReader reader;
+    protected BufferedReader inputReader;
     protected BufferedWriter writer;
     protected FileReader fileReader;
     protected FileWriter fileWriter;
@@ -37,14 +38,14 @@ public abstract class ViewAbstract implements BfView, Closeable {
 
     @Override
     public char readInput() throws IOException {
-        if (!fromConsole) {
-            reader = new BufferedReader(new InputStreamReader(System.in));
-        }
         char input;
-        while ((input = (char) reader.read()) == '\n') ;
-
-        if (reader != null && !fromConsole) {
-            reader.close();
+        if (!fromConsole) {
+            if(inputReader==null) {
+                inputReader = new BufferedReader(new InputStreamReader(System.in));
+            }
+            while ((input = (char) inputReader.read()) == '\n') ;
+        }else {
+            while ((input = (char) reader.read()) == '\n') ;
         }
         return input;
     }

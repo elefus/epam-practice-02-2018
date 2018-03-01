@@ -170,7 +170,7 @@ public class CommandExecutor implements Runnable {
                     return;
                 }
 
-                System.out.println(cmd);
+//                System.out.println(cmd);
 
                 executeAdd();
                 executeMove();

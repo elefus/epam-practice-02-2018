@@ -63,6 +63,7 @@ public class InputReader implements Runnable {
                 symbol = view.readSymbol();
 
                 if (symbol == Character.MAX_VALUE) {
+                    commandsQueue.put(new End(1));
                     return;
                 }
 
