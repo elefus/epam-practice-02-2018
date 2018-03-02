@@ -1,5 +1,6 @@
 package com.epam.optimizedInterpreter;
 
+import com.epam.Compiler.Compiler;
 import com.epam.interpreter.*;
 import org.apache.commons.cli.CommandLine;
 
@@ -68,12 +69,12 @@ public class OptimizedInterpreterInitializer {
             enableOptimization = false;
         }
 
+
         if (enableOptimization) {
             ExecutorService pool = Executors.newFixedThreadPool(3);
             pool.execute(new InputReader(commandsQueue, view));
             pool.execute(new InputOptimizer(commandsQueue, optimizedCommandsQueue));
-            pool.execute(new CommandExecutor(model, view, optimizedCommandsQueue, bufferIsInfinite,
-                    enableTraceMode, bufferSize));
+            pool.execute(new Compiler(optimizedCommandsQueue));
             pool.shutdown();
         } else {
             ControllerImpl controller;
