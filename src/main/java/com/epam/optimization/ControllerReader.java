@@ -55,7 +55,8 @@ public class ControllerReader implements Runnable {
 
                     case '_':
                         cmd = new End(1);
-                        break;
+                        cmdQueue.put(cmd);
+                        return;
 
 
                     default:
