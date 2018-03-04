@@ -16,8 +16,8 @@ public class Controller {
     static int listSize;
     static List<Opcode> commandOptimize;
     static int pos = cells.getBufSize() / 2 ;
-    private Stack<Loop> loops = new Stack<Loop>();
-    private int bracketsCounter = 0;
+    private Stack<Loop> loops = new Stack<>();
+
 
     public Controller(Viewer v, Optimizer o, Cells c){
         this.cells = c; this.viewer = v; this.optimizer =o;
@@ -26,7 +26,7 @@ public class Controller {
     }
 
     public void Interpret() {
-        findLoops(pos);
+        findLoops(cells.getBufSize() / 2 );
         for (int i = 0; i<listSize;i++){
             switch (commandOptimize.get(i).type){
                 case  SHIFT:
@@ -82,7 +82,6 @@ public class Controller {
     }
 
 
-
     private void While(int pos, int begin, int end){
         while(pos!=0){
             for (int j = begin+1; j<end-1;j++){
@@ -123,7 +122,7 @@ public class Controller {
                     loops.push(new Loop(j));
                     break;
                 case END:
-                    commandOptimize.get(loops.pop().getEnd()).end = j;
+                    commandOptimize.get(loops.pop().getBegin()).end = j;
             }
         }
     }

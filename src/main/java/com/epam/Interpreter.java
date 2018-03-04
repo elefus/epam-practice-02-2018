@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Interpreter {
-    private static final Set<String> brfSymbols = new HashSet<String>(Arrays.asList(
+    private static final Set<String> brfSymbols = new HashSet<>(Arrays.asList(
             new String[] {">","<",".",",","+","-","[","]"}
     ));
     String brfCode;
@@ -88,11 +88,6 @@ public class Interpreter {
 
 
         Controller controller = new Controller(new Viewer(bufferedReader,bufferedWriter),new Optimizer(brfCode),new Cells(100));
-
-
-        try { bufferedWriter.close(); bufferedReader.close();}
-        catch (Exception e){
-            e.printStackTrace();
+        controller.Interpret();
         }
     }
-}

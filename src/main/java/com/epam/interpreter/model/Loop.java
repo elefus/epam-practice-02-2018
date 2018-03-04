@@ -1,16 +1,13 @@
 package com.epam.interpreter.model;
 
 public class Loop {
-    private int end;
+    private int begin;
 
-    public Loop (int end) {
-        this.end = end;
+    public Loop (int b) {
+        this.begin = b;
     }
-    public int getEnd(){
-        return end;
-    }
-    public void setEnd(int i){
-        end = i;
+    public int getBegin(){
+        return begin;
     }
 
 }
