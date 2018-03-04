@@ -1,5 +1,6 @@
 package com.epam.interpreter.model;
 
+//класс для команд
 public class Opcode{
     public enum Type{
         SHIFT,
@@ -12,8 +13,8 @@ public class Opcode{
     }
 
     public Type type = null;
-    public int arg = 1;
-    public int begin;
+    public int arg = 1; //позволяет понять, сколько одинаковых комманд подряд
+    public int begin; // следующие три переменные нужны для обозначения циклов. только While, End
     public int end;
     public int pos;
 

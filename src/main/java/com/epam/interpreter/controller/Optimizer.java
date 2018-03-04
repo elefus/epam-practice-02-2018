@@ -4,6 +4,7 @@ import com.epam.interpreter.model.Opcode;
 import java.util.List;
 import java.util.Stack;
 
+//схлопываем токены
 public  class Optimizer {
     public  String code;
 

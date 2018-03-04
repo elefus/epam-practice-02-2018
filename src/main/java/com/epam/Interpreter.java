@@ -18,13 +18,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Interpreter {
+
     private static final Set<String> brfSymbols = new HashSet<>(Arrays.asList(
             new String[] {">","<",".",",","+","-","[","]"}
     ));
     String brfCode;
-
-
-
 
 
 
@@ -34,7 +32,7 @@ public class Interpreter {
 
         BufferedReader bufferedReader = null;
 
-
+        //парсер входных аргументов
         Options options = new Options();
         options.addOption("s", "source", true, "set the source file");
         options.addOption("b", "buffer", true, "set buffer size");
@@ -53,6 +51,9 @@ public class Interpreter {
             System.out.println("Parsing failed.  Reason: " + e.getMessage());
         }
 
+        //настройка потоков ввода вывода, в зависимости от переданных аргументов
+        //особенность в том, что в любом случае, полностью записываем входные данные в стринг
+        //для последующей обработки
         if(cmd.hasOption("source")){
             try {
                  brfCode = Files.lines(Paths.get("source"), StandardCharsets.UTF_8).collect(Collectors.joining());
@@ -86,7 +87,8 @@ public class Interpreter {
         }
 
 
-
+        //оптимайзер преобразовывает входные данные в команды
+        //размер буффера клеток 100, по дефолту стоит 30 000, но для простых тестов столько не надо
         Controller controller = new Controller(new Viewer(bufferedReader,bufferedWriter),new Optimizer(brfCode),new Cells(100));
         controller.Interpret();
         }

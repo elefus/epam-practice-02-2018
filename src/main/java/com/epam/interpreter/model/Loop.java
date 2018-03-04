@@ -1,5 +1,6 @@
 package com.epam.interpreter.model;
 
+//класс только для поиска связок [ и ]
 public class Loop {
     private int begin;
 

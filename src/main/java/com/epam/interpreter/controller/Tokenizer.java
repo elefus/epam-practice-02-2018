@@ -5,7 +5,7 @@ import com.epam.interpreter.model.Opcode;
 import java.util.ArrayList;
 import java.util.List;
 
-
+//заменяем код брейнфака на простые команды(токены)
 public  class Tokenizer{
     public static List<Opcode> tokenize(String code) {
 

@@ -13,12 +13,6 @@ public class Viewer {
         this.writer = writer;
     }
 
-
-    public String readInput() throws IOException{
-        System.out.println("Write smth");
-        return reader.readLine();
-    }
-
     public void write(byte c) throws IOException{
         Integer tor = new Byte(c).intValue() ;
         writer.write(tor.toString() + "\n");
