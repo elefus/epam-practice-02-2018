@@ -5,7 +5,7 @@ import java.io.*;
 public class View {
     public BufferedReader reader;
     private BufferedWriter writer;
-    private static InputStreamReader inputReader = new InputStreamReader(System.in);
+    private InputStreamReader inputReader = new InputStreamReader(System.in);
 
     public View (BufferedReader reader, BufferedWriter writer){
         this.reader = reader; this.writer = writer;

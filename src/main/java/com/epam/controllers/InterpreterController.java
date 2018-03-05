@@ -1,20 +1,26 @@
 package com.epam.controllers;
 
+import com.epam.Interpreter;
+import com.epam.models.Cells;
 import com.epam.views.View;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import static com.epam.controllers.InterpreterController.TYPE.*;
 
 public class InterpreterController {
-    static CellController c;
+    static Cells c;
     static View v;
+    int pointer;
 
-    public InterpreterController(View v, CellController c){
+    public InterpreterController(View v, Cells c){
         this.c = c; this.v = v;
     }
 
-    public static Runnable generateCommands (){
-        ArrayList<Runnable> toreturn = new ArrayList<>();
+    public Block generateCommands (){
+        ArrayList<Command> toreturn = new ArrayList<>();
         int prev = 0;
 
 
@@ -24,13 +30,11 @@ public class InterpreterController {
             try {
                 v.mark(1);
                 val=v.read();
-            } catch (IOException e) { System.out.println("OWIBKA");}
-
-
+            } catch (IOException e) { e.printStackTrace();}
 
             switch (val){
                 default:
-                    break BREAKER;
+                    continue BREAKER;
                 case -1:
                     break BREAKER;
                 case 'q':
@@ -39,23 +43,25 @@ public class InterpreterController {
                     continue BREAKER;
                 case 10:
                     continue BREAKER;
+                case 13:
+                    continue BREAKER;
                 case '<':
-                    toreturn.add(left);
+                    toreturn.add(new Move(-1));
                     break;
                 case '>':
-                    toreturn.add(right);
+                    toreturn.add(new Move(1));
                     break;
                 case '+':
-                    toreturn.add(increase);
+                    toreturn.add(new Add(1));
                     break;
                 case '-':
-                    toreturn.add(decrease);
+                    toreturn.add(new Add(-1));
                     break;
                 case ',':
-                    toreturn.add(in);
+                    toreturn.add(new Read());
                     break;
                 case '.':
-                    toreturn.add(out);
+                    toreturn.add(new Print());
                     break;
                 case '[':
                     toreturn.add(new Loop(generateCommands()));
@@ -76,35 +82,97 @@ public class InterpreterController {
         return new Block(toreturn);
     }
 
-    private static Runnable left = new Runnable() {
+    public Block optimize (Runnable cmds){
+        ArrayList<Command> ar = new ArrayList<>();
+        if(cmds instanceof Block){
+            ar = ((Block) cmds).components;
+        }
+        if(cmds instanceof Loop){
+            ar = ((Loop) cmds).body.components;
+        }
+        for(int i = 1; i < ar.size(); i++){
+            Command curr = ar.get(i);
+            Command prev = ar.get(i-1);
+
+            if(curr instanceof Loop){
+                if(((Loop) curr).body.components.size() == 1 && ((Loop) curr).body.components.get(0).type == A ){
+                    ar.set(i,new Assign());
+                    i--;
+                }
+                else {
+                    optimize(curr);
+                    continue;
+                }
+            }
+            if(curr.type == prev.type && curr.type != null || curr.type == A && prev instanceof Assign) {
+                prev.val = prev.val + curr.val;
+                ar.remove(i);
+
+                if(prev.val == 0 && i != 1) {
+                    ar.remove(i - 1);
+                    i--;
+                }
+                i--;
+            }
+        }
+        return new Block(ar);
+    }
+    enum TYPE {
+        A, M, P, R,
+    }
+
+    public abstract class Command implements Runnable {
+        public int val;
+        public TYPE type;
+        public String toString() {
+            return getClass().getSimpleName() + "(" + val + ")";
+        }
+    }
+
+    public class Assign extends Command {
+        public Assign() {
+        }
+
+        public void add (int toadd) {
+            val += toadd;
+        }
+
         @Override
         public void run() {
-            c.left();
+            c.set(pointer, (byte)(Byte.MIN_VALUE + val));
         }
-    };
+    }
 
-    private static Runnable right = new Runnable() {
+    public class Move extends Command {
+        public Move(int val) {
+            this.val = val;
+            this.type = M;
+        }
+
         @Override
         public void run() {
-            c.right();
+            pointer += val;
         }
-    };
+    }
+    public class Add extends Command {
+        public Add(int val) {
+            this.val = val;
+            this.type = A;
+        }
 
-    private static Runnable increase = new Runnable() {
         @Override
         public void run() {
-            c.inc();
+            byte toadd = c.get(pointer);
+            toadd += val;
+            c.set(pointer, toadd);
         }
-    };
 
-    private static Runnable decrease = new Runnable() {
-        @Override
-        public void run() {
-            c.dec();
+    }
+
+    public class Read extends Command {
+        public Read(){
+            this.type = R;
         }
-    };
-
-    private static Runnable in = new Runnable() {
         @Override
         public void run() {
             int character = -1;
@@ -117,25 +185,37 @@ public class InterpreterController {
 
                 System.out.println(character);
                 character-=128;
-                c.set((byte)character);
+                c.set(pointer, (byte)character);
             }
         }
     };
 
-    private static Runnable out = new Runnable() {
+    public class Print extends Command {
+        public Print(){
+            this.type = P;
+        }
         @Override
         public void run() {
             try {
-                v.write(c.get());
+                v.write(c.get(pointer));
             } catch (Exception e) {}
         }
     };
 
-    private static class Block implements Runnable {
-        private Iterable<Runnable> components;
+    public class Block extends Command {
+        public ArrayList<Command> components;
 
-        public Block(Iterable<Runnable> components) {
+        public Block(ArrayList<Command> components) {
             this.components = components;
+        }
+
+        @Override
+        public String toString() {
+            String r = "";
+
+            for(Command c : components)
+                r += c.toString() + " ";
+            return r;
         }
 
         @Override
@@ -145,17 +225,25 @@ public class InterpreterController {
         }
     }
 
-    private static class Loop implements Runnable {
-        private Runnable body;
+    public class Loop extends Command {
+        private Block body;
 
-        public Loop(Runnable body) {
+        public Loop(Block body) {
             this.body = body;
+        }
+
+        @Override
+        public String toString() {
+            String r = "LOOP:";
+            for(Command c : body.components)
+                r += c.toString();
+            return r;
         }
 
         @Override
         public void run() {
             while (true) {
-                if (c.get() == Byte.MIN_VALUE) return;
+                if (c.get(pointer) == Byte.MIN_VALUE) return;
                 body.run();
             }
         }

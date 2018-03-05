@@ -1,6 +1,5 @@
 package com.epam;
 
-import com.epam.controllers.CellController;
 import com.epam.controllers.InterpreterController;
 import com.epam.models.Cells;
 import com.epam.views.View;
@@ -9,9 +8,11 @@ import org.apache.commons.cli.*;
 import java.io.*;
 
 public class Interpreter {
+    public InterpreterController.Block example;
+    BufferedWriter w = null;
+    BufferedReader r = null;
     public Interpreter(String[] args){
-        BufferedWriter w = null;
-        BufferedReader r = null;
+
 
 
         Options options = new Options();
@@ -52,14 +53,16 @@ public class Interpreter {
 
 
 
+        InterpreterController b = new InterpreterController(new View(r,w), new Cells());
+        example = b.optimize(b.generateCommands());
+        //example = b.generateCommands();
+        System.out.println(example.toString());
 
+    }
 
-
-        InterpreterController b = new InterpreterController(new View(r,w), new CellController(new Cells()));
-        Runnable example = b.generateCommands();
+    public void run() {
         example.run();
-
         try { w.close(); r.close();}
-        catch (Exception e){}
+        catch (Exception e){ e.printStackTrace();}
     }
 }

@@ -1,14 +1,34 @@
 package com.epam.models;
 
+
+import java.util.Arrays;
+
 public class Cells {
-    byte[] a  = new byte[30000];;
+    final int explore = 10;
+    byte[] a  = new byte[0];
     public Cells() {
-        for(int i=0;i<a.length;i++)
-            a[i]=Byte.MIN_VALUE;
+        Arrays.fill(a, Byte.MIN_VALUE);
     }
 
-    public byte[] getAll() {
-        return a;
+    public byte get(int index) {
+        while(index >= a.length) {
+            exploreBuffer();
+        }
+        return a[index];
+    }
+
+    public void set(int index, byte val) {
+        while(index >= a.length) {
+            exploreBuffer();
+        }
+        a[index] = val;
+    }
+
+    private void exploreBuffer() {
+        byte[] ar = new byte[a.length + explore];
+        Arrays.fill(ar, Byte.MIN_VALUE);
+        System.arraycopy(a, 0, ar, 0, a.length);
+        a = ar;
     }
 
 
